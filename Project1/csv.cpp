@@ -10,6 +10,7 @@ vector<vector<string>> csvtovector(string file)
 	ifstream in;
 	in.open(file);
 	if (in.is_open()) {
+		getline(in, line);
 		cout << "open succeess" << endl;
 		while (getline(in,line))
 		{

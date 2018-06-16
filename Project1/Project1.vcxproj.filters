@@ -21,9 +21,21 @@
     <ClCompile Include="csv.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="cross_val.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="utils.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="csv.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="cross_val.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="utils.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
