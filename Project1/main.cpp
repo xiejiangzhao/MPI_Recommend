@@ -18,9 +18,10 @@ char processor_name[MPI_MAX_PROCESSOR_NAME];
 MPI_Status status;
 int myid, numprocs;
 map<string, int>  idmap;
+map<int, string> moviemap;
 void most_recommand(int userid) {
 	if (myid == 0) {
-		pair<int, float> rank[0126];
+		pair<int, float> rank[9126];
 		for (int i = 0; i < 9126; i++)
 		{
 			rank[i].first = i;
@@ -37,8 +38,18 @@ void most_recommand(int userid) {
 					rank[i].second += W[i][train[userid][j].first] * train[userid][j].second;
 				}
 			}
-			if (i < 50)
-				cout << i << " " << rank[i].second << endl;
+		}
+		for (int i = 0; i < 9126; i++)
+		{
+			for (int j = 0; j < 9126; j++)
+			{
+				if (rank[i].second > rank[j].second)
+					swap(rank[i], rank[j]);
+			}
+		}
+		for (int i = 0; i < 10; i++)
+		{
+			cout << moviemap[get_movie_id(idmap, rank[i].first)] << endl;
 		}
 	}
 }
@@ -54,10 +65,8 @@ void Buildmap(vector<vector<string>> src) {
 	for (int i = 0; i < src.size(); i++)
 	{
 		idmap[src[i][0]] = i;
+		moviemap[atoi(src[i][0].c_str())] = src[i][1];
 	}
-}
-int Bothlike(vector<pair<int, float>> a, vector<pair<int, float>> b) {
-	return 0;
 }
 vector<pair<int, float>>* itembase(vector<vector<string>> src, vector<pair<int, float>>* train)
 {
@@ -74,11 +83,13 @@ vector<pair<int, float>>* itembase(vector<vector<string>> src, vector<pair<int, 
 	}
 	return train;
 }
-void output_test() {
+void output_acu() {
 	if (myid == 0) {
-		for (int i = 0; i < 10; i++)
+		int usernum = 672;
+		float usersum = 0;
+		for (int i = 0; i < 672; i++)
 		{
-			cout << "User" << i << endl;
+			vector<pair<float, float>> usertmp;
 			for (int j = 0; j < test[i].size(); j++)
 			{
 				int movieid = test[i][j].first;
@@ -87,9 +98,20 @@ void output_test() {
 				{
 					sum += W[train[i][k].first][movieid] * train[i][k].second;
 				}
-				cout << sum << " User give    " << test[i][j].second << endl;
+				pair<float, float> tmp;
+				tmp.first = sum;
+				tmp.second = test[i][j].second;
+				usertmp.push_back(tmp);
 			}
+			if (usertmp.size() > 2)
+				usersum += acu(usertmp);
+			else
+			{
+				usernum--;
+			}
+			usertmp.clear();
 		}
+		cout << "final predict acu : " << usersum / usernum << endl;
 	}
 }
 int main(int argc, char *argv[]) {
@@ -150,16 +172,22 @@ int main(int argc, char *argv[]) {
 	cout << "Process " << myid << " :Finish in " << clock() - beg << endl;
 
 	int startpos = 9128 * myid / 4;
-	for (int i = startpos; i < startpos+2282; i++)
+	for (int i = startpos; i < startpos + 2282; i++)
 	{
 		for (int j = 0; j < 9128; j++)
 		{
-			own_W[i- startpos][j] = C[i][j] / sqrt(N[i] * N[j]);
+			own_W[i - startpos][j] = C[i][j] / sqrt(N[i] * N[j]);
 		}
 	}
 	MPI_Gather(own_W, 2282 * 9128, MPI_FLOAT, W, 2282 * 9128, MPI_FLOAT, 0, MPI_COMM_WORLD);
-	//MPI_Reduce(&own_W, &W, 9128 * 9128, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
-	output_test();
+	output_acu();
+	int id = 3;
+	while (id > 0)
+	{
+		cout << "Input user id" << endl;
+		cin >> id;
+		most_recommand(id);
+	}
 	MPI_Finalize(); //Ω· ¯MPIª∑æ≥
 	return 0;
 }
