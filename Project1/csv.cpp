@@ -28,3 +28,19 @@ vector<vector<string>> csvtovector(string file)
 	}
 	return Context;
 }
+void matrixtocsv(float src[9126][9126])
+{
+	ofstream outfile;
+	outfile.open("W.csv", ios::out);
+	for (int i = 0; i < 9126; i++)
+	{
+		for (int j = 0; j < 9126; j++)
+		{
+			outfile << src[i][j];
+			if (j != 9125)
+				outfile << ",";
+		}
+		outfile << endl;
+	}
+	outfile.close();
+}
