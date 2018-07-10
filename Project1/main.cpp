@@ -150,7 +150,7 @@ int main(int argc, char *argv[]) {
 	//计算矩阵C和N
 	cout << "Process " << myid << " :start count" << endl;
 	beg = clock();
-	for (int i = 672 * myid / 4; i < 672 * (myid + 1) / 4; i++)
+	for (int i = 672 * myid / numprocs; i < 672 * (myid + 1) / numprocs; i++)
 	{
 		for (int j = 0; j < train[i].size(); j++)
 		{
@@ -171,7 +171,7 @@ int main(int argc, char *argv[]) {
 	MPI_Allreduce(&own_C, &C, 9126 * 9126, MPI_FLOAT, MPI_SUM, MPI_COMM_WORLD);
 	cout << "Process " << myid << " :Finish in " << clock() - beg << endl;
 
-	int startpos = 9128 * myid / 4;
+	int startpos = 9128 * myid / numprocs;
 	for (int i = startpos; i < startpos + 2282; i++)
 	{
 		for (int j = 0; j < 9128; j++)
@@ -180,13 +180,15 @@ int main(int argc, char *argv[]) {
 		}
 	}
 	MPI_Gather(own_W, 2282 * 9128, MPI_FLOAT, W, 2282 * 9128, MPI_FLOAT, 0, MPI_COMM_WORLD);
-	output_acu();
-	int id = 3;
-	while (id > 0)
-	{
-		cout << "Input user id" << endl;
-		cin >> id;
-		most_recommand(id);
+	if (myid == 0) {
+		output_acu();
+		int id = 3;
+		while (id > 0)
+		{
+			cout << "Input user id" << endl;
+			cin >> id;
+			most_recommand(id);
+		}
 	}
 	MPI_Finalize(); //结束MPI环境
 	return 0;
